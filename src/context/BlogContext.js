@@ -1,18 +1,20 @@
+//*** : */Prior to persistent data storage with ngrok server
 import createDataContext  from './createDataContext';
+import jsonServer from '../api/jsonServer';
 
 
 //reducer
 const blogReducer = (blogPosts, action) => {
     switch(action.type) {
-        case 'addBlogPosts':
-            return [
-                ...blogPosts, 
-                { 
-                    title: action.payload.title, 
-                    content: action.payload.content,
-                    id: Math.floor(Math.random()*999)
-                }
-            ];
+        // *** case 'addBlogPosts':
+        //     return [
+        //         ...blogPosts, 
+        //         { 
+        //             title: action.payload.title, 
+        //             content: action.payload.content,
+        //             id: Math.floor(Math.random()*999)
+        //         }
+        //     ];
             
         case 'deleteBlogPosts':
             return blogPosts.filter((blog) => blog.id !== action.payload);
@@ -20,23 +22,38 @@ const blogReducer = (blogPosts, action) => {
             return blogPosts.map((blogPost) => {
                 return blogPost.id === action.payload.id ? action.payload : blogPost;
             });
+        case 'getBlogPosts':
+            return action.payload;
         default:
             return state;
     }
 }
 
+//api call
+const getBlogPosts = dispatch => {
+    return async () => {
+        const response = await jsonServer.get('/blogPosts');
+
+        dispatch ({ type: 'getBlogPosts', payload: response.data })
+    };
+};
+
+
 //helper functions
 const addBlogPosts = (dispatch) => {
-    return (title, content, callback) => {
-        dispatch ({ type: 'addBlogPosts', payload: { title: title, content: content }})
+    return async (title, content, callback) => {
+        await jsonServer.post('/blogPosts', { title: title, content: content });
+        
+        // *** dispatch ({ type: 'addBlogPosts', payload: response.data});
         if (callback){
             callback();
-        }
+        };
     }
 }
 
 const deleteBlogPosts = dispatch => {
-    return (id) => {
+    return async (id) => {
+        await jsonServer.delete(`/blogPosts${id}`);
         dispatch ({ type: 'deleteBlogPosts', payload: id})
     }
 }
@@ -47,7 +64,9 @@ const deleteBlogPosts = dispatch => {
 // }
 
 const editBlogPosts = dispatch => {
-    return (id, title, content, callback) => {
+    return async (id, title, content, callback) => {
+        await jsonServer.put(`/blogPosts${id}`, { title, content })
+        
         dispatch ({ 
             type: 'editBlogPosts', 
             payload: { id, title, content }})
@@ -61,7 +80,7 @@ const editBlogPosts = dispatch => {
 
 export const { Context, Provider } = createDataContext(
     blogReducer, 
-    { addBlogPosts, deleteBlogPosts, editBlogPosts }, 
+    { addBlogPosts, deleteBlogPosts, editBlogPosts, getBlogPosts }, 
     []
     );
 

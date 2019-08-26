@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { StyleSheet, Text, View, FlatList, Button, TouchableOpacity } from 'react-native';
 import { FontAwesome, Feather } from '@expo/vector-icons';
 
@@ -7,7 +7,19 @@ import { Context as BlogContext } from '../context/BlogContext';
 
 const AllBlogsScreen = ({ navigation }) => {
 
-  const { state, deleteBlogPosts } = useContext(BlogContext);
+  const { state, deleteBlogPosts, getBlogPosts } = useContext(BlogContext);
+
+  //calls my API on compondentDidMount: call to server and pull in state
+  useEffect(() => {
+    getBlogPosts();
+    navigation.addListener('didFocus', () => {
+      getBlogPosts();
+    });
+    //to avoid memory leak (if choose to unmount this screen)
+    return() => {
+      listener.remove();
+    };
+  }, []);
 
     return(
         <View>
