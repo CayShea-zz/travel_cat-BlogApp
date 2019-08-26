@@ -7,7 +7,7 @@ const EditScreen = ({ navigation }) => {
 
     const blogId = navigation.getParam('id');
 
-    const { state } = useContext(BlogContext);
+    const { state, editBlogPosts } = useContext(BlogContext);
     const blogPost = state.find((blog) => blog.id === blogId);
 
     const [title, setTitle] = useState(blogPost.title);
@@ -24,7 +24,7 @@ const EditScreen = ({ navigation }) => {
             <Button 
                 title="Save" 
                 onPress={() => {
-                    // addBlogPosts(title, content, () => {
+                    editBlogPosts(blogId, title, content, () => {
                         navigation.navigate('AllBlogs')
                     });
                 }}/>

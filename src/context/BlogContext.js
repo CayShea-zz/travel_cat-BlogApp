@@ -5,7 +5,6 @@ import createDataContext  from './createDataContext';
 const blogReducer = (blogPosts, action) => {
     switch(action.type) {
         case 'addBlogPosts':
-                console.log('added');
             return [
                 ...blogPosts, 
                 { 
@@ -17,18 +16,22 @@ const blogReducer = (blogPosts, action) => {
             
         case 'deleteBlogPosts':
             return blogPosts.filter((blog) => blog.id !== action.payload);
-        // case: 'updateBlog':
-        //     return
+        case 'editBlogPosts':
+            return blogPosts.map((blogPost) => {
+                return blogPost.id === action.payload.id ? action.payload : blogPost;
+            });
         default:
             return state;
     }
 }
 
-//helper function
+//helper functions
 const addBlogPosts = (dispatch) => {
     return (title, content, callback) => {
         dispatch ({ type: 'addBlogPosts', payload: { title: title, content: content }})
-        callback();
+        if (callback){
+            callback();
+        }
     }
 }
 
@@ -38,10 +41,27 @@ const deleteBlogPosts = dispatch => {
     }
 }
 
+// //used to callback functions not needing the extra 'return'. Why is it needed now? Dispatch?
+// const deleteBlogPosts = (id) => {
+//     dispatch ({ type: 'deleteBlogPosts', payload: id})
+// }
+
+const editBlogPosts = dispatch => {
+    return (id, title, content, callback) => {
+        dispatch ({ 
+            type: 'editBlogPosts', 
+            payload: { id, title, content }})
+        if (callback){
+            callback();
+        }
+        
+    }
+}
+
 
 export const { Context, Provider } = createDataContext(
     blogReducer, 
-    { addBlogPosts, deleteBlogPosts }, 
+    { addBlogPosts, deleteBlogPosts, editBlogPosts }, 
     []
     );
 
